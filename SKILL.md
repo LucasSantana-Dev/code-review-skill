@@ -12,9 +12,7 @@ description: >
   module's quality/architecture/maintainability — not for implementing.
 argument-hint: '[<file-or-directory>] [--pr <N>] [--comment] [--fix] [--fan-out]'
 metadata:
-  owner: global-agents
   tier: contextual
-  canonical_source: /Users/lucassantana/.claude-env/skills/code-review
 ---
 
 # Code Review — Senior QA

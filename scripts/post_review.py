@@ -122,7 +122,8 @@ def fmt_comment_body(f):
 
 def cmd_post(a):
     owner, name = resolve_repo(a.repo)
-    findings = json.loads(open(a.findings).read())
+    with open(a.findings) as f:
+        findings = json.loads(f.read())
     if not isinstance(findings, list):
         raise SystemExit("findings.json must be a JSON list")
     head = pr_head_sha(owner, name, a.pr)
@@ -146,7 +147,8 @@ def cmd_post(a):
         counts[f.get("severity", "P2")] = counts.get(f.get("severity", "P2"), 0) + 1
     if getattr(a, "body_file", None):
         # Reviewer-supplied lead (verdict, narrative summary findings, what's good).
-        summary = open(a.body_file).read().rstrip() + "\n"
+        with open(a.body_file) as f:
+            summary = f.read().rstrip() + "\n"
     else:
         summary = (
             "## Senior-QA review\n\n"

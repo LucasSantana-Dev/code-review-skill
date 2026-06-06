@@ -22,6 +22,15 @@ later with `git pull`. Forking is encouraged: the `references/` library is meant
 > dirs (`~/.claude/skills/`, `~/.claude-env/skills/`, `~/.agents/skills/`); end users only need
 > the single clone above.
 
+## License & openness
+
+Permissively licensed (Apache-2.0 — see [LICENSE](LICENSE)). The [`references/`](references/)
+library is *deliberately* open, forkable, and community-curatable — the opposite of a proprietary
+locked "learnings" database. We keep it open by intent and by keeping it good, not by a copyleft
+clause ([ADR-0008](decisions/0008-permissive-not-copyleft-for-the-corpus.md)): the upstream
+library stays fresher than any closed fork, and contributions compound here. Send your patterns
+back — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Why a bundled script, not an MCP server?
 
 A skill is `SKILL.md` + bundled resources, and **bundled scripts are the canonical pattern**

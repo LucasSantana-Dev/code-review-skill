@@ -36,6 +36,12 @@ All notable changes to the code-review skill. Format loosely follows
   `SECURITY.md` (per-user GitHub App token model), `CODE_OF_CONDUCT.md` (Contributor Covenant),
   `.github/PULL_REQUEST_TEMPLATE.md`, and a README install section leading with the universal
   `~/.claude/skills/` clone path (sync.sh reframed as a maintainer convenience).
+- **ADR-0008 — permissive, not copyleft, for the corpus**: examined and rejected copyleft/split
+  licensing (CC-BY-SA on `references/`, MPL) for the open core. Decisive: the agent weaves
+  reference content into users' PR outputs, so share-alike creates a perceived "infection" risk
+  that blocks adoption, while copyleft protection is symbolic (paraphrase evades it; a solo
+  maintainer can't enforce it). Anti-enclosure is pursued by curation velocity + community + a
+  stated-intent README note, not a license clause. Finalizes ADR-0007's license facet.
 
 ## [0.2.0] — 2026-06-06
 

@@ -145,10 +145,11 @@ stop; that is bias, not calibration.
 Post real inline comments and reconcile them across pushes, like CodeRabbit/cubic.
 **Posting is gated:** default output is the chat report; only post when invoked with an
 explicit `--pr <N>` target *and* `--comment` (or the user confirms). Never auto-spray.
-**Posting identity:** post only under a dedicated machine/bot account (authenticate `gh` or
-set `GH_TOKEN` as the bot; set `CODE_REVIEW_BOT_LOGIN` so the script refuses any other login)
-— **never under a human operator's personal GitHub profile.** The posted summary uses a
-neutral `## Code review` header; do not stamp it with a persona/"Senior-QA" label.
+**Posting identity:** post under a dedicated bot, **never a human's personal GitHub profile.**
+Recommended: a **GitHub App** — mint an installation token with `scripts/app_token.py` and pass
+it as `GH_TOKEN` (mechanics in REFERENCE.md; rationale in ADR-0004); fallback is a machine
+account + PAT. Set `CODE_REVIEW_BOT_LOGIN` to the bot login so `post_review.py` refuses any other
+identity. The posted summary uses a neutral `## Code review` header; no persona/"Senior-QA" stamp.
 
 Use the bundled helper for the deterministic API plumbing
 ([scripts/post_review.py](scripts/post_review.py)) — you supply findings + judgment:

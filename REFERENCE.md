@@ -93,12 +93,21 @@ Mechanics for *PR-comment mode*. The bundled `scripts/post_review.py` wraps the 
 CLI so a single bad line never sinks the whole review and thread state is reconciled
 deterministically. `gh auth status` must succeed first.
 
-**Posting identity.** The review is posted under whatever account `gh` (or `GH_TOKEN`) is
-authenticated as — **never post under a human operator's personal account.** Authenticate
-`gh` as a dedicated machine/bot account (or set `GH_TOKEN` to its PAT) before posting. Set
-`CODE_REVIEW_BOT_LOGIN=<bot-login>` and the script refuses to post/resolve/reply unless the
-authenticated login matches it. The posted summary uses a neutral `## Code review` header —
-do not stamp it with a persona label.
+**Posting identity.** The review is posted under whatever account `gh`/`GH_TOKEN` is
+authenticated as — **never a human operator's personal account.** Recommended: a **GitHub App**
+(a true `<app-slug>[bot]` identity — see ADR-0004). Mint a short-lived installation token with
+`scripts/app_token.py` (stdlib + `openssl`: signs an RS256 JWT, discovers the repo's
+installation, exchanges it) and pass it as `GH_TOKEN`:
+
+```bash
+GH_TOKEN="$(python3 scripts/app_token.py --app-id <id> --repo owner/name --key-file app.pem)" \
+CODE_REVIEW_BOT_LOGIN='<app-slug>[bot]' \
+python3 scripts/post_review.py post <PR> findings.json --repo owner/name --event COMMENT
+```
+
+Fallback: a machine account + fine-grained PAT (`gh auth` or `GH_TOKEN`). Either way, set
+`CODE_REVIEW_BOT_LOGIN` and the script refuses to post/resolve/reply unless the authenticated
+login matches it. The posted summary uses a neutral `## Code review` header — no persona stamp.
 
 ### Findings JSON
 

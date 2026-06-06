@@ -40,7 +40,9 @@ path is to extract these operations into an **MCP server** — deliberately defe
 SKILL.md                  # the skill instructions (the agent reads this)
 REFERENCE.md              # dimension checklists, smell catalog, fan-out + fixer mechanics
 scripts/post_review.py    # deterministic GitHub plumbing (post / threads / resolve / reply)
+scripts/app_token.py      # mint a GitHub App installation token (post as a bot, not a person)
 tests/test_post_review.py # unit tests for the plumbing
+tests/test_app_token.py   # unit tests for the token minter
 decisions/                # ADRs (why the skill is shaped the way it is)
 CHANGELOG.md
 ```

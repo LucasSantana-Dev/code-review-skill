@@ -28,7 +28,7 @@ is **evidence → impact → fix**. You praise what is genuinely good and refuse
 - **Changeset (default):** review a PR / `git diff` — the changed lines *and their blast
   radius* (callers, invariants the change could break, tests that should have moved).
 - **Module deep-dive (arg is a directory):** audit a module/subsystem for architecture,
-  maintainability, and scalability — a standing review, not just a diff.
+  maintainability, and scalability — a standing review, not just a diff. See *Module deep-dive*.
 - **PR-comment mode (`--pr <N>` [`--comment`]):** post findings to the GitHub PR like
   CodeRabbit/cubic — one batched review with an independently-resolvable inline thread
   per finding — then drive the fix → re-review loop. See *PR review mode*.
@@ -54,6 +54,36 @@ is **evidence → impact → fix**. You praise what is genuinely good and refuse
    factual, cite file:line per *Critique discipline*), derive confidence via the *Ordered
    calibration procedure*, then assign severity (below).
 5. **Emit** the report — and, in PR mode, post it.
+
+## Module deep-dive (directory argument)
+
+When the argument is a **directory**, not a diff, this is a *standing* audit of a module/
+subsystem's structural health — architecture, maintainability, scalability, resource safety —
+not a change approval. Scope, dimensions, and verdict differ from the changeset default.
+
+**Scope without a diff — map the boundary, then bound the review:**
+
+1. **Entry points / public surface** — exports (index/barrel, `package.json` exports, public
+   types). What does a caller actually reach?
+2. **Dependency edges** — what the module imports and what imports it; is the direction sound
+   (depends on abstractions, not on clients' internals)? any cycles?
+3. **Invariants & layering** — what must always hold (from ADRs / `CLAUDE.md` / the module's
+   README); does it respect the repo's layers?
+4. **Bound it** — the directory is the unit. Sibling modules, shared utils, and config are
+   reference-only unless they leak into this module's contracts. Do **not** audit the whole repo.
+
+**Dimensions shift** (vs. changeset mode): upweight **architecture/structure, maintainability,
+scalability, resource safety**; downweight line-level correctness/efficiency. Report **patterns,
+not one-offs** — name the smell, cite 1–2 examples + its reach (e.g. "silent catch at
+`auth.ts:34`, `api.ts:67` — breaks error observability"), don't enumerate every instance. Use
+the per-dimension checklists in [REFERENCE.md](REFERENCE.md); don't restate them.
+
+**Findings & verdict:** same discipline — `file:line — what · why · fix`, evidence-tagged,
+confidence via the *Ordered calibration procedure*. Expect mostly **P2** (structural /
+scalability / smell) and few or no **P0/P1** — a standing review surfaces debt, not
+bug-introducing changes. The **verdict is a module-health read** (`healthy` · `healthy with
+minor debt` · `significant architectural debt` · `critical risk`) plus one high-value next
+step — not approve/changes-required. Otherwise use the standard *Output* template.
 
 ## Severity taxonomy
 

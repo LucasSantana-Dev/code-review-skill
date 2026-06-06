@@ -5,6 +5,19 @@ All notable changes to the code-review skill. Format loosely follows
 
 ## [Unreleased]
 
+### Added
+- **Curated references library** (`references/`, ADR-0005): a forkable, version-controlled
+  corpus of defect patterns automated tools miss — the open product core. Seeded with four
+  entries (intent-implementation mismatch, business-logic edge cases, cross-file invariant
+  break, broken access control) spanning Tier-1/Tier-2/flag-don't-approve, plus a README
+  defining the entry format and the human-curation (not autonomous-learning) growth model.
+- **"What to hunt — the tools-miss frontier"** section in `SKILL.md`: a prioritization lens
+  (Tier-1 semantic/business-logic/intent-mismatch · Tier-2 cross-file/api/architecture ·
+  flag-don't-approve concurrency/security-logic) so judgment goes where lint/types/SAST/coverage
+  are blind, with `references/` wired into the review process.
+- **ADR-0005**: compounding review quality via a curated knowledge layer (human-in-the-loop),
+  not an autonomous learning loop — the loop is deferred behind volume triggers.
+
 ## [0.2.0] — 2026-06-06
 
 ### Added

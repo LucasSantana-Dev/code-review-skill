@@ -1,6 +1,6 @@
 # code-review
 
-A senior-QA code-review skill for agentic coding tools (built for Claude Code). It does an
+A code-review skill for agentic coding tools (built for Claude Code). It does an
 evidence-driven critique across correctness, security, maintainability, scalability,
 architecture, efficiency, resource leaks, code smells, and tests — and can post findings to
 a GitHub PR as a CodeRabbit/cubic-style batched review with resolvable inline threads, a
@@ -20,7 +20,7 @@ A skill is `SKILL.md` + bundled resources, and **bundled scripts are the canonic
 for deterministic work (Anthropic's own `pdf`/`docx`/`xlsx` skills ship Python). This skill is
 deliberately two-layered:
 
-- **Judgment** (`SKILL.md` + `REFERENCE.md`) — the senior-QA review reasoning. This is what
+- **Judgment** (`SKILL.md` + `REFERENCE.md`) — the review reasoning. This is what
   makes it a *skill*, and it ports anywhere the Agent Skills spec is supported.
 - **Mechanics** (`scripts/post_review.py`) — deterministic, error-prone GitHub plumbing
   (batched inline threads, GraphQL resolve/reply, baseline-SHA re-review, off-diff folding).

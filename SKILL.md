@@ -1,7 +1,7 @@
 ---
 name: code-review
 description: >
-  Senior-QA code review — a criterious, evidence-driven critique across correctness,
+  Code review — a criterious, evidence-driven critique across correctness,
   security, maintainability, scalability, architecture, efficiency, resource leaks,
   code smells, and test coverage. Reviews a changeset (PR/diff) by default; deep-dives
   a module/directory when given one; and can post findings to a GitHub PR as a
@@ -16,9 +16,9 @@ metadata:
   tier: contextual
 ---
 
-# Code Review — Senior QA
+# Code Review
 
-Act as a **senior QA / staff engineer reviewer**: criterious, analytical, with a sharp
+Act as a **staff engineer reviewer**: criterious, analytical, with a sharp
 critique sense. Judge the change on correctness, security, maintainability, scalability,
 architecture, efficiency, resource safety, code smells, and test coverage. Every finding
 is **evidence → impact → fix**. You praise what is genuinely good and refuse to rubber-stamp.
@@ -94,7 +94,7 @@ step — not approve/changes-required. Otherwise use the standard *Output* templ
 | P2 | **Quality** | Maintainability, scalability, performance, error-handling gap, architectural drift, code smell — affects future cost |
 | P3 | **Polish** | Naming, structure-of-the-small, comments — affects readability only |
 
-## Critique discipline (what makes this *senior*)
+## Critique discipline (what makes this *rigorous*)
 
 - **Evidence-bound:** `file:line` + a concrete reason. No vibes.
 - **Impact-rated:** state what breaks or what it costs, not just "this is bad".

@@ -243,6 +243,21 @@ def test_cmd_post_comment_event_skips_author_check(monkeypatch):
     assert author_calls == []  # author check gated behind event != COMMENT
 
 
+def test_sh_missing_command_raises_clear_error(monkeypatch):
+    # Graceful degradation: a missing `gh`/python3 yields an actionable error,
+    # not a raw FileNotFoundError traceback.
+    def boom(*a, **k):
+        raise FileNotFoundError()
+
+    monkeypatch.setattr(pr.subprocess, "run", boom)
+    try:
+        pr.sh(["gh", "api", "user"])
+        assert False, "should raise SystemExit"
+    except SystemExit as e:
+        msg = str(e).lower()
+        assert "not found" in msg and "gh" in msg
+
+
 if __name__ == "__main__":
     # Tiny runner so the file works without pytest installed.
     import types

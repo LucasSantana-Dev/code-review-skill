@@ -52,9 +52,17 @@ SEV_LABEL = {
 
 def sh(args, input_=None, check=True):
     """Run a command, return stdout. Raises with stderr on failure when check."""
-    p = subprocess.run(
-        args, input=input_, capture_output=True, text=True
-    )
+    try:
+        p = subprocess.run(
+            args, input=input_, capture_output=True, text=True
+        )
+    except FileNotFoundError:
+        # The skill shells out to the GitHub CLI — fail with an actionable message
+        # instead of a raw traceback when it (or python3) isn't on PATH.
+        raise SystemExit(
+            f"required command not found: {args[0]!r}. This skill needs the GitHub CLI "
+            "— install it (https://cli.github.com) and run `gh auth login`."
+        )
     if p.stderr:
         sys.stderr.write(p.stderr)
     if check and p.returncode != 0:

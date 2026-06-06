@@ -11,6 +11,7 @@ description: >
   in an isolated git worktree). Use when the user asks to review code, a diff, a PR, or a
   module's quality/architecture/maintainability — not for implementing.
 argument-hint: '[<file-or-directory>] [--pr <N>] [--comment] [--fix] [--fan-out]'
+allowed-tools: Read, Grep, Glob, Bash, Task
 metadata:
   tier: contextual
 ---

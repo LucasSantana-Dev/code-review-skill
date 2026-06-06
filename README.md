@@ -14,6 +14,26 @@ to those locations, run:
 bash scripts/sync.sh
 ```
 
+## Why a bundled script, not an MCP server?
+
+A skill is `SKILL.md` + bundled resources, and **bundled scripts are the canonical pattern**
+for deterministic work (Anthropic's own `pdf`/`docx`/`xlsx` skills ship Python). This skill is
+deliberately two-layered:
+
+- **Judgment** (`SKILL.md` + `REFERENCE.md`) — the senior-QA review reasoning. This is what
+  makes it a *skill*, and it ports anywhere the Agent Skills spec is supported.
+- **Mechanics** (`scripts/post_review.py`) — deterministic, error-prone GitHub plumbing
+  (batched inline threads, GraphQL resolve/reply, baseline-SHA re-review, off-diff folding).
+  The agent supplies findings as JSON; the script makes no judgment calls and its code never
+  enters the model's context.
+
+**Scope (honest):** the *posting* path shells out to the `gh` CLI, so it targets Claude Code
+(and skills-spec agents) with `gh` installed and authenticated — it is **not** claimed to run
+unchanged in headless CI or non-script agents. Overhead is a few hundred ms per `gh` call,
+immaterial for on-demand use. If cross-agent/headless posting becomes a need, the migration
+path is to extract these operations into an **MCP server** — deliberately deferred until then
+(see [decisions/0003](decisions/0003-keep-bundled-script-skill-packaging.md)).
+
 ## Layout
 
 ```

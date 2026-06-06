@@ -5,6 +5,7 @@
 - **Deciders:** Lucas Santana (solo operator)
 - **Supersedes:** (none)
 - **Superseded by:** (none)
+- **Refined by:** ADR-0009 (its "MCP is the cross-agent migration path" framing is corrected — MCP carries plumbing, not reasoning)
 
 ## Context
 

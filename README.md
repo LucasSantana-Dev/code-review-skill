@@ -44,12 +44,15 @@ deliberately two-layered:
   The agent supplies findings as JSON; the script makes no judgment calls and its code never
   enters the model's context.
 
-**Scope (honest):** the *posting* path shells out to the `gh` CLI, so it targets Claude Code
-(and skills-spec agents) with `gh` installed and authenticated — it is **not** claimed to run
-unchanged in headless CI or non-script agents. Overhead is a few hundred ms per `gh` call,
-immaterial for on-demand use. If cross-agent/headless posting becomes a need, the migration
-path is to extract these operations into an **MCP server** — deliberately deferred until then
-(see [decisions/0003](decisions/0003-keep-bundled-script-skill-packaging.md)).
+**Scope (honest):** the rubric (`SKILL.md` + `REFERENCE.md`) and the `references/` corpus are
+plain markdown and the scripts are Python-stdlib — **reusable in any agent.** But the *execution*
+is Claude-Code-class: fan-out and the `--fix` fixers use Claude Code primitives (they degrade to
+single-pass / propose-only elsewhere), and the *posting* path shells out to `gh` (needs `gh` +
+the bot-identity setup in any env). So it's **not** claimed to run unchanged in headless CI or
+other agents. Cross-agent/headless reach is deferred behind a demand-differentiated decision tree
+— CI → a GitHub Action; another interactive agent → the open skills standard; an MCP server only
+for shared *posting* plumbing (MCP carries tools, not the review reasoning). See
+[decisions/0009](decisions/0009-cross-agent-reach-defer-with-decision-tree.md).
 
 ## Layout
 

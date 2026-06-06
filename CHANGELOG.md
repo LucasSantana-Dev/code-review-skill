@@ -42,6 +42,12 @@ All notable changes to the code-review skill. Format loosely follows
   that blocks adoption, while copyleft protection is symbolic (paraphrase evades it; a solo
   maintainer can't enforce it). Anti-enclosure is pursued by curation velocity + community + a
   stated-intent README note, not a license clause. Finalizes ADR-0007's license facet.
+- **ADR-0009 — cross-agent reach**: stay Claude-Code-first; build no cross-agent infra now (no
+  MCP/CLI/Action/AGENTS.md on spec). The rubric + `references/` + stdlib scripts are already
+  portable; Claude-only execution (fan-out/fixers) degrades gracefully. Corrects ADR-0003's "MCP
+  is the migration path" framing (MCP carries plumbing, not reasoning). Defers the next move
+  behind a demand-differentiated decision tree (CI → GitHub Action; interactive cross-agent →
+  skills standard + AGENTS.md; MCP only for shared posting plumbing). README scope clarified.
 
 ## [0.2.0] — 2026-06-06
 

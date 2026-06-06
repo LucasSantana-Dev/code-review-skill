@@ -66,18 +66,46 @@ is **evidence → impact → fix**. You praise what is genuinely good and refuse
 - **Evidence-bound:** `file:line` + a concrete reason. No vibes.
 - **Impact-rated:** state what breaks or what it costs, not just "this is bad".
 - **Actionable:** every finding carries a specific fix or a sharp question — never a bare complaint.
-- **Calibrated:** separate fact from preference; tag preferences `(opinion)`. Flag
-  false-positive risk on anything you're <80% sure of rather than asserting it.
+- **Calibrated:** separate fact from preference; tag preferences `(opinion)`. Set each
+  finding's confidence with the *Ordered calibration procedure* below; surface
+  low-confidence findings as questions rather than asserting them.
 - **Evidence-tiered:** tag each finding `factual` (provable now — type error, null-deref,
-  a failing test you could write), `behavioral` (depends on runtime/inputs), or
-  `speculative` (a hunch). The bar for an inline thread is `factual`/high-confidence;
-  fold `speculative` into the summary's *Open questions*, don't spawn a thread. (Only
-  `factual` findings are ever eligible for auto-fix — see *Fix mode*.)
+  a test assertion in the repo's suite, or a real type error the repo's own typecheck
+  fails on; **before tagging `factual`, state the exact file:line and why no
+  runtime/input context is needed to prove it**), `behavioral` (depends on
+  runtime/inputs), or `speculative` (a hunch). If you cannot state file:line + reason
+  for `factual`, the finding is `behavioral` or `speculative`. (Only `factual`
+  findings are ever eligible for auto-fix — see *Fix mode*.) Confidence calibration
+  with ordered procedure follows in the *Ordered calibration procedure* section below.
 - **Prioritized:** P0/P1 before P2/P3; never bury a blocker under nits; don't pad with trivia.
 - **Honest:** name genuinely good design too; if the change is solid, say so plainly. Do
   not invent problems to look thorough.
 - **Systemic:** prefer root cause + recurring pattern over one-off symptoms — name the
   smell and point to where else it appears.
+
+## Ordered calibration procedure
+
+After you tag a finding's evidence type (using the evidence-verification step above for `factual`),
+derive its confidence in three steps:
+
+1. **Evidence type → confidence band:**
+   - `factual` (provable now) → 0.8–1.0
+   - `behavioral` (runtime/input-dependent) → 0.5–0.8
+   - `speculative` (a hunch) → 0.0–0.5
+
+2. **Within the band, ask:** "What fraction of independent senior reviewers would agree
+   with this finding?" (0.7 = ~7 in 10 agree; 0.5 = ~half.)
+
+3. **Pick the value** that matches your answer. (Not "how confident am I" — ask about
+   independent agreement; it resists inflated confidence.)
+
+**Cost of error:** A false-positive inline thread damages reviewer trust and burns
+bandwidth. A missed P0/P1 ships a bug. But the answer is not to inflate confidence;
+it is (a) always-inline P0/P1 regardless of confidence (see *PR review mode* below),
+and (b) calibrate P2/P3 honestly to independent-reviewer agreement. Verify your
+confidence estimate against the independent-reviewer question, not against the cost
+of error — if you find yourself raising confidence because the miss would be costly,
+stop; that is bias, not calibration.
 
 ## PR review mode
 
@@ -92,7 +120,8 @@ Use the bundled helper for the deterministic API plumbing
    `{path, line, severity, title, body[, confidence][, evidence][, suggestion][, start_line][, side]}`.
    `confidence` ∈ [0,1]; `evidence` ∈ `factual|behavioral|speculative` — these drive the
    *Confidence & evidence gating* in [REFERENCE.md](REFERENCE.md) (inline vs summary vs drop,
-   and which fixes may auto-apply). Add a ` ```suggestion ` block only for small,
+   and which fixes may auto-apply). **P0/P1 findings always post inline regardless of
+   confidence or evidence type** — see the gating matrix for P2/P3 rules. Add a ` ```suggestion ` block only for small,
    self-contained fixes (≤5 lines, one location); never for structural/multi-site changes.
    One thread per unique issue — no duplicates.
 2. **Post** one batched review (off-diff findings auto-fold into the summary):

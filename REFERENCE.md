@@ -200,15 +200,43 @@ The orchestrator owns this — never a lane. Drop nitpicks before they become th
 
 | severity \ confidence | ≥0.8 | 0.5–0.8 | <0.5 |
 |---|---|---|---|
-| **P0/P1** | inline thread | inline thread | summary "Open questions" |
+| **P0/P1** | inline thread | inline thread | inline thread |
 | **P2** | inline thread | summary | drop |
 | **P3** | inline (only if `factual`) | summary | drop |
 
-- `evidence=speculative` → never inline regardless of confidence; fold to *Open questions*.
-- `evidence=factual` (provable now: type error, null-deref, a failing test you'd write) →
-  the only tier eligible for `--fix` auto-apply.
+- `evidence=factual` (provable now: type error, null-deref, a test assertion in the repo's suite, or a real type error the repo's own typecheck fails on;
+  evidence must cite exact file:line and why no runtime context is needed — see SKILL.md *Evidence-tiered*) →
+  confidence band 0.8–1.0; the only tier eligible for `--fix` auto-apply.
+- `evidence=behavioral` (depends on runtime/inputs; not provable from static code alone) →
+  confidence band 0.5–0.8; propose-only for `--fix`, never auto-applied.
+- `evidence=speculative` (a hunch) → confidence band 0.0–0.5; never inline regardless of
+  confidence; fold to *Open questions*. **Exception: P0/P1 findings always post inline
+  (see matrix row above).**
 - This matrix is the single biggest false-positive lever — most "AI reviewer noise" is
   low-confidence P3 nitpicks posted as inline threads. (CodeRabbit/Qodo both gate this way.)
+
+#### Counter-example: factual vs. behavioral boundary
+
+**Claim:** "This map grows unbounded and will OOM the server."
+
+**Looks factual** — the code allocates a map, never clears it, so it must grow.
+
+**Actually behavioral:** the growth depends on runtime input volume (how many cache keys are
+created by users), which the static code cannot prove. The same code might be safe in a
+low-volume service and unsafe under peak load. **Tag: behavioral (band 0.5–0.8).** Pick the
+value within the band by the agreement question: if prior incidents on similar code in this
+repo mean most reviewers would call it risky, that's the upper end (~0.7–0.8); a first
+sighting with weaker agreement sits lower (~0.5–0.6).
+
+**To make it factual**, cite one of these:
+- "A test in the repo's suite at `file:line` demonstrates the OOM at typical load."
+- "The repo's typecheck fails at `file:line` (cite the error)."
+- "Commit `<sha>` added a test specifically for this bug; it fails without the fix."
+
+Do not claim "I could write a test that shows this" or "under 100 req/sec for 24 hours it
+would OOM" — that is hypothetical, not factual. Anchor to what *is* in the repo or what *has*
+been observed (failed tests, failed typechecks, production incidents), not what *could be*
+written or inferred.
 
 ---
 

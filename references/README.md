@@ -110,6 +110,11 @@ Copy this skeleton into `references/<kebab-case-name>.md`:
 
 ## Index
 
+> Keep this table in sync when adding/editing an entry — one row per file, with its defect
+> class and tier. `tests/test_references_index.py` enforces the sync (it's the review agent's
+> cheap catalog; see ADR-0006). Selection is the agent's call by defect class today; a
+> deterministic selector arrives only when the library outgrows that (~25–30 entries).
+
 | Pattern | Class | Tier |
 |---|---|---|
 | [intent-implementation-mismatch](intent-implementation-mismatch.md) | intent-mismatch | 1 |

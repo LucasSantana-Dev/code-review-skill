@@ -25,6 +25,11 @@ All notable changes to the code-review skill. Format loosely follows
 - **"Standard of review" section** in `SKILL.md`: the merge bar distilled from those projects —
   approve when it improves code health (not perfection), ask don't decree, `Nit:`-label optional
   polish, don't expand scope, defer where expertise gates it.
+- **ADR-0006 + references index drift-guard**: references retrieval stays agent-driven/advisory
+  (select by defect class, priors-not-filter) at current scale; the operator's personal RAG index
+  is ruled out as non-portable; deterministic selector/BM25/embeddings deferred behind an entry-
+  count trigger (~25–30). `tests/test_references_index.py` (3 tests) asserts the README index
+  lists exactly the entry files with matching class/tier so the catalog can't drift.
 
 ## [0.2.0] — 2026-06-06
 

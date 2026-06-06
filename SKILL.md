@@ -63,10 +63,11 @@ This skill earns its keep on what linters, type-checkers, SAST, coverage, and AI
 tests **cannot** see. Those gates already cover syntax, types, known-vulnerable patterns, and
 line execution — don't re-litigate them. Spend your judgment budget on the classes below,
 highest yield first. The [`references/`](references/) library holds concrete, forkable pattern
-entries for these — consult the ones matching the change's language/domain, and **add a new
-entry when a review surfaces a novel, generalizable pattern.** That curation is how the skill
-compounds over time (ADR-0005) — there is no autonomous learning loop; a human promotes
-patterns into `references/`.
+entries for these. Skim its index ([`references/README.md`](references/README.md)) and pull the
+few entries whose **defect class** matches what this diff plausibly risks — they're priors to
+consider, not a precise filter, so a related-but-imperfect match is fine; don't load the whole
+library (ADR-0006). **Add a new entry when a review surfaces a novel, generalizable pattern** —
+that human curation is how the skill compounds (ADR-0005); there is no autonomous learning loop.
 
 **Tier 1 — highest value, best signal (lead with these):**
 - **Semantic / logic correctness** — code that runs and type-checks but computes the wrong

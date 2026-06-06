@@ -17,6 +17,14 @@ All notable changes to the code-review skill. Format loosely follows
   are blind, with `references/` wired into the review process.
 - **ADR-0005**: compounding review quality via a curated knowledge layer (human-in-the-loop),
   not an autonomous learning loop — the loop is deferred behind volume triggers.
+- **Curation method — learn from elite OSS reviews**: `references/README.md` documents a
+  repeatable pass that mines both the codified review guidelines (Google eng-practices, Linux,
+  Chromium, Kubernetes, Rust, OWASP) and real review threads for transferable patterns. Three
+  new evidence-grounded entries derived from it (missing-error-path-in-multi-step,
+  unhandled-enum-variant, concurrency ordering — citing real PRs: Kafka #15557, React #18000).
+- **"Standard of review" section** in `SKILL.md`: the merge bar distilled from those projects —
+  approve when it improves code health (not perfection), ask don't decree, `Nit:`-label optional
+  polish, don't expand scope, defer where expertise gates it.
 
 ## [0.2.0] — 2026-06-06
 

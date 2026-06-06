@@ -153,6 +153,23 @@ step — not approve/changes-required. Otherwise use the standard *Output* templ
 - **Systemic:** prefer root cause + recurring pattern over one-off symptoms — name the
   smell and point to where else it appears.
 
+## Standard of review (the merge bar)
+
+How mature projects (Google eng-practices, Linux, Chromium, Kubernetes) keep review
+high-signal — apply the same bar:
+
+- **Approve when the change improves overall code health — not when it's perfect.** Don't block
+  on hypotheticals or taste; continuous improvement beats gatekeeping.
+- **Ask, don't decree.** Frame uncertain findings as questions, assume author competence, and
+  give the rationale + a concrete fix — never a bare complaint.
+- **Label optional polish `Nit:`** so must-fix is distinguishable from nice-to-have. Never block
+  on style the repo doesn't enforce.
+- **Don't expand scope.** Flag unrelated cleanup bundled into the change; suggest follow-ups
+  rather than demanding them here.
+- **Defer where expertise gates it** (security logic, crypto, perf): surface the risk and
+  recommend a specialist/closer pass rather than asserting certainty — this is the *flag-don't-
+  approve* posture from *What to hunt*.
+
 ## Ordered calibration procedure
 
 After you tag a finding's evidence type (using the evidence-verification step above for `factual`),

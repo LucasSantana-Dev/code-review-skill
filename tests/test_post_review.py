@@ -3,11 +3,26 @@
 Run: python3 -m pytest tests/ -q   (or: python3 tests/test_post_review.py)
 """
 import json
+import os
 import sys
+import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import post_review as pr  # noqa: E402
+
+
+@contextmanager
+def _findings_file(data):
+    """Write findings JSON to a temp file, yield its path, and always unlink it."""
+    f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    try:
+        json.dump(data, f)
+        f.close()
+        yield f.name
+    finally:
+        os.unlink(f.name)
 
 
 def test_fmt_comment_body_basic():
@@ -37,8 +52,6 @@ def test_diff_lines_binary_file_has_no_lines(monkeypatch):
 
 def test_cmd_post_empty_findings_raises_error(monkeypatch):
     """Empty findings should raise an error instead of posting a meaningless review."""
-    import tempfile
-
     class Args:
         pr = "123"
         repo = None
@@ -46,24 +59,15 @@ def test_cmd_post_empty_findings_raises_error(monkeypatch):
         dry_run = True
         body_file = None
 
-    # Create empty findings file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-        json.dump([], f)
-        findings_file = f.name
-
-    args = Args()
-    args.findings = findings_file
-
-    # Mock GitHub calls (they won't be reached, but just in case)
     monkeypatch.setattr(pr, "resolve_repo", lambda x: ("owner", "name"))
-
-    try:
-        # This should raise SystemExit
-        pr.cmd_post(args)
-        raise AssertionError("cmd_post should have raised SystemExit for empty findings")
-    except SystemExit as e:
-        # Verify the error message mentions empty findings
-        assert "empty" in str(e).lower(), f"Error message should mention empty findings: {e}"
+    args = Args()
+    with _findings_file([]) as fp:
+        args.findings = fp
+        try:
+            pr.cmd_post(args)
+            raise AssertionError("cmd_post should have raised SystemExit for empty findings")
+        except SystemExit as e:
+            assert "empty" in str(e).lower(), f"Error message should mention empty findings: {e}"
 
 
 def test_validate_finding_rejects_non_int_line():
@@ -180,12 +184,6 @@ def test_cmd_post_downgrades_event_on_self_authored_pr(monkeypatch):
     # F13: REQUEST_CHANGES/APPROVE on your own PR is downgraded to COMMENT.
     import io
     import contextlib
-    import tempfile
-
-    findings = [{"path": "a.py", "line": 2, "severity": "P1", "title": "t", "body": "b"}]
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-        json.dump(findings, f)
-        fp = f.name
 
     monkeypatch.setattr(pr, "resolve_repo", lambda r: ("o", "n"))
     monkeypatch.setattr(pr, "pr_head_sha", lambda o, n, p: "sha1")
@@ -201,10 +199,12 @@ def test_cmd_post_downgrades_event_on_self_authored_pr(monkeypatch):
         body_file = None
 
     args = Args()
-    args.findings = fp
-    buf = io.StringIO()
-    with contextlib.redirect_stdout(buf):
-        pr.cmd_post(args)
+    findings = [{"path": "a.py", "line": 2, "severity": "P1", "title": "t", "body": "b"}]
+    with _findings_file(findings) as fp:
+        args.findings = fp
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            pr.cmd_post(args)
     payload = json.loads(buf.getvalue())
     assert payload["event"] == "COMMENT"  # downgraded from REQUEST_CHANGES
 
@@ -213,12 +213,6 @@ def test_cmd_post_comment_event_skips_author_check(monkeypatch):
     # F13: the default COMMENT event must not trigger the extra author lookup.
     import io
     import contextlib
-    import tempfile
-
-    findings = [{"path": "a.py", "line": 2, "severity": "P1", "title": "t", "body": "b"}]
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-        json.dump(findings, f)
-        fp = f.name
 
     author_calls = []
     monkeypatch.setattr(pr, "resolve_repo", lambda r: ("o", "n"))
@@ -234,10 +228,12 @@ def test_cmd_post_comment_event_skips_author_check(monkeypatch):
         body_file = None
 
     args = Args()
-    args.findings = fp
-    buf = io.StringIO()
-    with contextlib.redirect_stdout(buf):
-        pr.cmd_post(args)
+    findings = [{"path": "a.py", "line": 2, "severity": "P1", "title": "t", "body": "b"}]
+    with _findings_file(findings) as fp:
+        args.findings = fp
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            pr.cmd_post(args)
     payload = json.loads(buf.getvalue())
     assert payload["event"] == "COMMENT"
     assert author_calls == []  # author check gated behind event != COMMENT
@@ -256,6 +252,66 @@ def test_sh_missing_command_raises_clear_error(monkeypatch):
     except SystemExit as e:
         msg = str(e).lower()
         assert "not found" in msg and "gh" in msg
+
+
+def test_cmd_resolve_calls_graphql_per_thread(monkeypatch):
+    # cmd_resolve runs one resolveReviewThread mutation per thread id.
+    import io
+    import contextlib
+
+    calls = []
+    monkeypatch.setattr(pr, "sh", lambda args, *a, **k: calls.append(args) or "")
+
+    class Args:
+        thread_id = ["T1", "T2"]
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        pr.cmd_resolve(Args())
+    assert len(calls) == 2
+    assert all("graphql" in c for c in calls)
+    assert any("id=T1" in " ".join(c) for c in calls)
+    assert any("id=T2" in " ".join(c) for c in calls)
+    assert "resolved T1" in buf.getvalue() and "resolved T2" in buf.getvalue()
+
+
+def test_cmd_reply_posts_thread_reply(monkeypatch):
+    # cmd_reply posts one addPullRequestReviewThreadReply mutation with the body.
+    import io
+    import contextlib
+
+    calls = []
+    monkeypatch.setattr(pr, "sh", lambda args, *a, **k: calls.append(args) or "")
+
+    class Args:
+        thread_id = "T9"
+        body = "Resolved in abc123"
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        pr.cmd_reply(Args())
+    assert len(calls) == 1
+    joined = " ".join(calls[0])
+    assert "graphql" in joined and "t=T9" in joined and "addPullRequestReviewThreadReply" in joined
+    assert "replied to T9" in buf.getvalue()
+
+
+def test_cmd_baseline_prints_resolved_baseline(monkeypatch):
+    # cmd_baseline prints the SHA from _last_baseline.
+    import io
+    import contextlib
+
+    monkeypatch.setattr(pr, "resolve_repo", lambda r: ("o", "n"))
+    monkeypatch.setattr(pr, "_last_baseline", lambda o, n, p: "abc123")
+
+    class Args:
+        repo = None
+        pr = 7
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        pr.cmd_baseline(Args())
+    assert buf.getvalue().strip() == "abc123"
 
 
 if __name__ == "__main__":

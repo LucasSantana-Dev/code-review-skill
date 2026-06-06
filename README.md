@@ -55,6 +55,9 @@ CHANGELOG.md
 | `… --fan-out` | Parallel per-dimension reviewers (auto above the size gate). |
 | `… --fix` | Dispatch human-gated, self-verifying fixers, one per finding. |
 
+> **Prerequisites:** the review-only modes need only the repo. The `--comment` and `--fix`
+> modes post to GitHub via the `gh` CLI, so `gh auth status` must succeed first.
+
 ## post_review.py
 
 Wraps the `gh` CLI so a single bad line never sinks the whole review and thread state
@@ -65,6 +68,7 @@ S=scripts/post_review.py
 python3 $S post <PR> findings.json --event COMMENT --body-file review.md  # batch-post
 python3 $S post <PR> findings.json --dry-run                              # preview payload
 python3 $S threads <PR>                                                   # open/resolved + baseline
+python3 $S baseline <PR>                                                  # just the last baseline SHA
 python3 $S reply <PR> <thread_id> "Resolved in <sha>: …"
 python3 $S resolve <thread_id> [<thread_id> …]
 ```

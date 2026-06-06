@@ -5,6 +5,37 @@ All notable changes to the code-review skill. Format loosely follows
 
 ## [Unreleased]
 
+### Added
+- **Confidence calibration** (ADR-0002): ordered procedure — tag evidence type → derive a
+  confidence band (factual 0.8–1.0 / behavioral 0.5–0.8 / speculative 0.0–0.5, aligned to the
+  gating-matrix columns) → pick the value via independent-reviewer agreement; cost-of-error
+  framing that forbids inflating confidence; a factual-vs-behavioral counter-example.
+- **Module deep-dive procedure** for the directory-argument mode: no-diff scoping (boundary
+  mapping + bounding), dimension shift toward architecture/maintainability/scalability, and a
+  module-health verdict instead of approve/changes-required.
+- `allowed-tools` frontmatter on `SKILL.md`; README "Why a bundled script?" positioning (ADR-0003).
+- `post_review.py` hardening: per-finding validation (`validate_finding`), renamed-file
+  (`previous_filename`) diff mapping, self-authored-PR `REQUEST_CHANGES`/`APPROVE` → `COMMENT`
+  auto-downgrade, `--paginate` on the baseline reviews fetch.
+- More unit tests (16) and a standalone test runner with per-test monkeypatch teardown.
+
+### Changed
+- **P0/P1 findings always post inline**, regardless of confidence/evidence — no demotion to
+  summary/"open questions" (ADR-0002). Evidence/confidence gating now applies to P2/P3 only.
+- `factual` evidence must cite exact file:line + why no runtime context is needed (anchored to
+  observable repo facts, not "a test you'd write").
+
+### Fixed
+- Empty findings list no longer posts a blank review; thread bodies no longer truncated to
+  200 chars in `threads` output; `gh`/`python3` missing now yields a clear error, not a traceback.
+- `_last_baseline` extracts the last (most recent) baseline marker in a review body.
+- `fmt_comment_body` skips whitespace-only suggestions (no empty ```suggestion block).
+- `sync.sh` exits non-zero when no destination directories exist (was a silent success).
+
+### Notes
+- ADR-0002 (confidence calibration) and ADR-0003 (keep bundled-script packaging; reject
+  MCP/CLI/Action for now) added under `decisions/`.
+
 ## [0.1.0] — 2026-06-05
 
 ### Added

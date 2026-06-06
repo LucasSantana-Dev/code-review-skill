@@ -37,6 +37,7 @@ done
 echo "Syncing $SKILL_NAME skill from $REPO_ROOT to deployed destinations..."
 echo ""
 
+SYNCED=0
 for dest in "${DESTINATIONS[@]}"; do
   if [ ! -d "$dest" ]; then
     echo "⚠️  Skipping $dest (directory does not exist)"
@@ -55,6 +56,12 @@ for dest in "${DESTINATIONS[@]}"; do
 
   echo "✓ Synced to $dest"
   echo ""
+  SYNCED=$((SYNCED + 1))
 done
 
-echo "✓ Sync complete"
+if [ "$SYNCED" -eq 0 ]; then
+  echo "✗ Sync failed: none of the ${#DESTINATIONS[@]} destination directories exist." >&2
+  exit 1
+fi
+
+echo "✓ Sync complete ($SYNCED destination(s))"

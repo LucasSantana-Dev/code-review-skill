@@ -159,7 +159,7 @@ def validate_finding(finding, index):
 def fmt_comment_body(f):
     body = f"**{SEV_LABEL.get(f.get('severity','P2'), f.get('severity','P2'))}** — {f.get('title','').strip()}\n\n{f.get('body','').strip()}"
     sug = f.get("suggestion")
-    if sug:
+    if sug and sug.strip():  # skip whitespace-only suggestions (empty code block)
         body += "\n\n```suggestion\n" + sug.rstrip("\n") + "\n```"
     return body
 
@@ -259,7 +259,8 @@ def _last_baseline(owner, name, pr, login=None):
         r_login = (r.get("user") or {}).get("login", "")
         body = r.get("body") or ""
         if MARKER in body and (r_login == login or r_login.endswith("[bot]")):
-            base = body.split(MARKER, 1)[1].split(" ", 1)[0]
+            # take the LAST marker in the body (most recent if a body was edited)
+            base = body[body.rfind(MARKER) + len(MARKER):].split(" ", 1)[0]
     return base
 
 

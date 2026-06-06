@@ -6,13 +6,21 @@ architecture, efficiency, resource leaks, code smells, and tests — and can pos
 a GitHub PR as a CodeRabbit/cubic-style batched review with resolvable inline threads, a
 fix → re-review loop, size-gated reviewer fan-out, and human-gated self-verifying fixers.
 
-This repo is the **canonical source** for the skill. Deployed copies live under
-`~/.claude/skills/`, `~/.claude-env/skills/`, and `~/.agents/skills/`. To sync this repo
-to those locations, run:
+## Install
+
+Clone (or fork) into your Claude Code skills directory:
 
 ```bash
-bash scripts/sync.sh
+git clone https://github.com/LucasSantana-Dev/code-review-skill ~/.claude/skills/code-review
 ```
+
+That's the whole install — `SKILL.md` + `scripts/` (Python stdlib only) + `references/`. Update
+later with `git pull`. Forking is encouraged: the `references/` library is meant to be extended
+(see [CONTRIBUTING.md](CONTRIBUTING.md)).
+
+> `scripts/sync.sh` is a maintainer convenience that mirrors this repo into several local skill
+> dirs (`~/.claude/skills/`, `~/.claude-env/skills/`, `~/.agents/skills/`); end users only need
+> the single clone above.
 
 ## Why a bundled script, not an MCP server?
 

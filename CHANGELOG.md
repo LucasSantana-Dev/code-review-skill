@@ -30,6 +30,12 @@ All notable changes to the code-review skill. Format loosely follows
   is ruled out as non-portable; deterministic selector/BM25/embeddings deferred behind an entry-
   count trigger (~25–30). `tests/test_references_index.py` (3 tests) asserts the README index
   lists exactly the entry files with matching class/tier so the catalog can't drift.
+- **ADR-0007 + open-release scaffolding**: distribution = public git as source of truth (plugin
+  marketplace + DCO deferred until demand); license decision = Apache-2.0 (pending the relicense);
+  minimal contribution model. Added `CONTRIBUTING.md` (keyed to the references entry format),
+  `SECURITY.md` (per-user GitHub App token model), `CODE_OF_CONDUCT.md` (Contributor Covenant),
+  `.github/PULL_REQUEST_TEMPLATE.md`, and a README install section leading with the universal
+  `~/.claude/skills/` clone path (sync.sh reframed as a maintainer convenience).
 
 ## [0.2.0] — 2026-06-06
 

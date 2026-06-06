@@ -1,9 +1,11 @@
 # Changelog
 
 All notable changes to the code-review skill. Format loosely follows
-[Keep a Changelog](https://keepachangelog.com/); this skill is not semver-versioned yet.
+[Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.1.0] — 2026-06-05
 
 ### Added
 - Size-gated reviewer **fan-out** (`--fan-out`): parallel per-dimension reviewers above a
@@ -25,3 +27,5 @@ All notable changes to the code-review skill. Format loosely follows
   `REQUEST_CHANGES`/`APPROVE` on your own PR).
 - ADR 0001 records the scoped architecture decision and the deferred always-on/auto-fix
   build behind explicit evidence triggers.
+
+<!-- Releases: tag commits with git tag v<N> and push with git push --tags -->

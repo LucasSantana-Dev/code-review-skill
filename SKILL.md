@@ -145,6 +145,10 @@ stop; that is bias, not calibration.
 Post real inline comments and reconcile them across pushes, like CodeRabbit/cubic.
 **Posting is gated:** default output is the chat report; only post when invoked with an
 explicit `--pr <N>` target *and* `--comment` (or the user confirms). Never auto-spray.
+**Posting identity:** post only under a dedicated machine/bot account (authenticate `gh` or
+set `GH_TOKEN` as the bot; set `CODE_REVIEW_BOT_LOGIN` so the script refuses any other login)
+— **never under a human operator's personal GitHub profile.** The posted summary uses a
+neutral `## Code review` header; do not stamp it with a persona/"Senior-QA" label.
 
 Use the bundled helper for the deterministic API plumbing
 ([scripts/post_review.py](scripts/post_review.py)) — you supply findings + judgment:
@@ -259,6 +263,8 @@ P0:<n> P1:<n> P2:<n> P3:<n>
 - Never report unverified work as reviewed-clean; read the code to confirm each claim.
 - Do not fabricate findings to appear rigorous, and do not rubber-stamp to be agreeable.
 - Do not post to a PR without an explicit `--pr` target + `--comment`/confirmation.
+- Never post/resolve/reply under a human operator's personal GitHub account — bot identity only.
+- Never stamp the posted review with a persona/"Senior-QA" label; use the neutral `## Code review` header.
 - Never resolve or dismiss a human reviewer's thread; bots-only.
 - Do not bypass required gates unless the user explicitly asks.
 - **Fan-out only above the size threshold** — fanning out a small diff burns tokens for no gain.

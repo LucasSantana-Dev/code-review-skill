@@ -296,6 +296,28 @@ def test_cmd_reply_posts_thread_reply(monkeypatch):
     assert "replied to T9" in buf.getvalue()
 
 
+def test_assert_post_identity_blocks_mismatch(monkeypatch):
+    # CODE_REVIEW_BOT_LOGIN set + gh user differs → refuse to post.
+    monkeypatch.setattr(pr, "sh", lambda *a, **k: "some-human\n")
+    os.environ["CODE_REVIEW_BOT_LOGIN"] = "review-bot"
+    try:
+        pr.assert_post_identity()
+        assert False, "should raise SystemExit"
+    except SystemExit as e:
+        assert "refusing to post" in str(e).lower() and "review-bot" in str(e)
+    finally:
+        os.environ.pop("CODE_REVIEW_BOT_LOGIN", None)
+
+
+def test_assert_post_identity_noop_when_unset(monkeypatch):
+    # Unset env → no-op, and no `gh api user` call is made.
+    calls = []
+    monkeypatch.setattr(pr, "sh", lambda *a, **k: calls.append(a) or "x")
+    os.environ.pop("CODE_REVIEW_BOT_LOGIN", None)
+    pr.assert_post_identity()
+    assert calls == []
+
+
 def test_cmd_baseline_prints_resolved_baseline(monkeypatch):
     # cmd_baseline prints the SHA from _last_baseline.
     import io

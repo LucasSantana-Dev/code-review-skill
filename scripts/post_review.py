@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""post_review.py — post a Senior-QA review to a GitHub PR as a single batched
+"""post_review.py — post a code review to a GitHub PR as a single batched
 review with inline threads, and drive the fix → re-review loop.
 
 CodeRabbit/cubic-style: ONE review event (summary + per-finding inline threads),
@@ -37,6 +37,7 @@ Subcommands
 """
 import argparse
 import json
+import os
 import subprocess
 import sys
 
@@ -77,6 +78,24 @@ def resolve_repo(repo):
     out = sh(["gh", "repo", "view", "--json", "owner,name"])
     d = json.loads(out)
     return d["owner"]["login"], d["name"]
+
+
+def assert_post_identity():
+    """Refuse to write to GitHub under the wrong account.
+
+    If CODE_REVIEW_BOT_LOGIN is set, the authenticated `gh` user MUST equal it —
+    a guard so reviews are never posted under a personal account by mistake.
+    Off by default (portable); set the env var to a machine/bot login to enforce.
+    """
+    expected = os.environ.get("CODE_REVIEW_BOT_LOGIN")
+    if not expected:
+        return
+    actual = sh(["gh", "api", "user", "--jq", ".login"]).strip()
+    if actual != expected:
+        raise SystemExit(
+            f"refusing to post as {actual!r}: CODE_REVIEW_BOT_LOGIN={expected!r}. "
+            "Authenticate `gh` (or set GH_TOKEN) as the review bot, or unset the guard."
+        )
 
 
 def pr_head_sha(owner, name, pr):
@@ -214,7 +233,7 @@ def cmd_post(a):
             summary = f.read().rstrip() + "\n"
     else:
         summary = (
-            "## Senior-QA review\n\n"
+            "## Code review\n\n"
             + " · ".join(f"{k}: {counts[k]}" for k in sorted(counts, key=lambda s: SEV_ORDER.get(s, 9)))
             + f"\n\n{len(inline)} inline · {len(offdiff)} summary-only finding(s).\n"
         )
@@ -229,6 +248,7 @@ def cmd_post(a):
     if a.dry_run:
         print(json.dumps(payload, indent=2))
         return
+    assert_post_identity()  # never post under a non-bot account when the guard is set
     out = sh(["gh", "api", f"repos/{owner}/{name}/pulls/{a.pr}/reviews",
               "--method", "POST", "--input", "-"],
              input_=json.dumps(payload))
@@ -285,6 +305,7 @@ def cmd_threads(a):
 
 
 def cmd_resolve(a):
+    assert_post_identity()
     q = "mutation($id:ID!){resolveReviewThread(input:{threadId:$id}){thread{isResolved}}}"
     for tid in a.thread_id:
         sh(["gh", "api", "graphql", "-f", f"query={q}", "-F", f"id={tid}"])
@@ -292,6 +313,7 @@ def cmd_resolve(a):
 
 
 def cmd_reply(a):
+    assert_post_identity()
     q = ("mutation($t:ID!,$b:String!){addPullRequestReviewThreadReply("
          "input:{pullRequestReviewThreadId:$t,body:$b}){comment{id}}}")
     sh(["gh", "api", "graphql", "-f", f"query={q}", "-F", f"t={a.thread_id}", "-F", f"b={a.body}"])

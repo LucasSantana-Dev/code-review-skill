@@ -93,6 +93,13 @@ Mechanics for *PR-comment mode*. The bundled `scripts/post_review.py` wraps the 
 CLI so a single bad line never sinks the whole review and thread state is reconciled
 deterministically. `gh auth status` must succeed first.
 
+**Posting identity.** The review is posted under whatever account `gh` (or `GH_TOKEN`) is
+authenticated as — **never post under a human operator's personal account.** Authenticate
+`gh` as a dedicated machine/bot account (or set `GH_TOKEN` to its PAT) before posting. Set
+`CODE_REVIEW_BOT_LOGIN=<bot-login>` and the script refuses to post/resolve/reply unless the
+authenticated login matches it. The posted summary uses a neutral `## Code review` header —
+do not stamp it with a persona label.
+
 ### Findings JSON
 
 A list of objects; one object = one inline thread:
@@ -146,7 +153,7 @@ P0/P1 stands; `APPROVE` only when genuinely clean; `COMMENT` otherwise.
 ```bash
 # Batched review with inline threads:
 gh api repos/{o}/{r}/pulls/{N}/reviews --method POST --input - <<'JSON'
-{"event":"COMMENT","body":"## Senior-QA review …\n<!-- code-review:baseline=<sha> -->",
+{"event":"COMMENT","body":"## Code review …\n<!-- code-review:baseline=<sha> -->",
  "comments":[{"path":"src/foo.ts","line":42,"side":"RIGHT","body":"**P1** …"}]}
 JSON
 

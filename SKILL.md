@@ -49,7 +49,9 @@ is **evidence → impact → fix**. You praise what is genuinely good and refuse
    [REFERENCE.md](REFERENCE.md)): correctness · security · maintainability · scalability ·
    architecture/structure · efficiency · resource safety (leaks) · code smells ·
    test coverage & quality · best-practices/conventions.
-4. **Classify** every finding by severity (below).
+4. **Classify** every finding: tag evidence type (factual/behavioral/speculative — for
+   factual, cite file:line per *Critique discipline*), derive confidence via the *Ordered
+   calibration procedure*, then assign severity (below).
 5. **Emit** the report — and, in PR mode, post it.
 
 ## Severity taxonomy
@@ -148,7 +150,9 @@ official `/code-review --comment` and community skills; mechanics in
 Default is **one strong reviewer pass** — it's faster and cheaper than fan-out for typical
 PRs. Fan out across parallel per-dimension reviewer subagents **only** when the diff is
 large enough to pay for it (rule of thumb: **>~600 changed LOC, >~15 files, or >~8k tokens
-of diff**, or the user passes `--fan-out`). Each lane sees the *whole* diff through one
+of diff**, or the user passes `--fan-out`). Measure the gate with
+`git diff --shortstat <base>..HEAD` — changed LOC = insertions + deletions, files = the
+reported file count, tokens ≈ 4 × LOC. Each lane sees the *whole* diff through one
 dimension — do **not** token-chunk the diff (the context window holds it; chunking loses
 cross-file signal). When you fan out:
 
@@ -175,8 +179,10 @@ comment→fix→re-review loop. This is the half that touches code, so the gates
     **propose-only**; show the diff and get explicit approval before applying.
   - **Protected paths** (auth, payments, deploy/CI config, migrations, `main` itself) →
     never auto-apply; always propose.
-- **Worktree-isolated:** each fixer runs in its own git worktree under the repo's
-  worktrees dir (parallel mandate). On a single PR branch, run fixers **sequentially**
+- **Worktree-isolated:** each fixer runs in its own git worktree, created with
+  `git worktree add .worktrees/<finding-id>` (or the repo's configured worktree location)
+  and removed with `git worktree remove` once it completes (parallel mandate). On a single
+  PR branch, run fixers **sequentially**
   (one finding → fix → re-verify → next) — no parallel pushes to one branch.
 - **Self-verify before resolving:** every fixer must run the affected suite + diff its own
   branch and report real output. **Never** trust a fixer's "✅" — re-verify yourself, then
@@ -205,7 +211,9 @@ comment→fix→re-review loop. This is the half that touches code, so the gates
 <each finding: file:line — what · why it matters · fix>
 
 ## What's good
-<1–3 things done well — calibration, not flattery>
+<1–3 things done well — specific and evidence-anchored (file:line or named pattern), not
+generic praise; e.g. "input validated at the trust boundary in `api/upload.ts:18`" not
+"good error handling".>
 
 ## Dimensions checked
 Correctness ✓ | Security ✓ | Maintainability ✓ | Scalability ✓ | Architecture ✓ | Efficiency ✓ | Leaks ✓ | Smells ✓ | Tests ✓ | A11y ✓/N/A

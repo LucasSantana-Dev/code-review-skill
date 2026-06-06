@@ -77,6 +77,12 @@ def pr_head_sha(owner, name, pr):
     return out.strip()
 
 
+def pr_author(owner, name, pr):
+    out = sh(["gh", "api", f"repos/{owner}/{name}/pulls/{pr}",
+              "--jq", ".user.login"])
+    return out.strip()
+
+
 def diff_lines(owner, name, pr):
     """Return {path: set(of RIGHT-side line numbers present in the diff)}.
 
@@ -88,9 +94,12 @@ def diff_lines(owner, name, pr):
     valid = {}
     for f in files:
         path = f.get("filename") or f.get("path")  # GH /files API returns `filename`
+        prev = f.get("previous_filename")  # set on renames — map the old path too
         patch = f.get("patch")
         if not patch:
             valid[path] = set()  # binary/large file: treat all as off-diff
+            if prev:
+                valid[prev] = set()
             continue
         lines = set()
         new_ln = 0
@@ -110,7 +119,33 @@ def diff_lines(owner, name, pr):
             else:
                 new_ln += 1
         valid[path] = lines
+        if prev:
+            valid[prev] = lines
     return valid
+
+
+def validate_finding(finding, index):
+    """Validate a single finding dict. Raise SystemExit with clear error naming the finding."""
+    # Validate line is an integer (not a string representation)
+    line = finding.get("line")
+    if line is not None and not isinstance(line, int):
+        raise SystemExit(
+            f"finding[{index}]: 'line' must be an integer, got {type(line).__name__}: {line!r}"
+        )
+
+    # Validate start_line is an integer if present (not a string representation)
+    start_line = finding.get("start_line")
+    if start_line is not None and not isinstance(start_line, int):
+        raise SystemExit(
+            f"finding[{index}]: 'start_line' must be an integer, got {type(start_line).__name__}: {start_line!r}"
+        )
+
+    # Validate severity is one of the allowed values (but allow silent defaulting to P2 by not raising)
+    severity = finding.get("severity")
+    if severity and severity not in SEV_ORDER:
+        raise SystemExit(
+            f"finding[{index}]: 'severity' must be one of {set(SEV_ORDER.keys())}, got {severity!r}"
+        )
 
 
 def fmt_comment_body(f):
@@ -130,7 +165,23 @@ def cmd_post(a):
         raise SystemExit(f"findings file not found: {a.findings}")
     if not isinstance(findings, list):
         raise SystemExit("findings.json must be a JSON list")
+    if not findings:
+        raise SystemExit("findings.json is empty — no findings to post. If code is clean, pass a custom message via --body-file or skip posting.")
+
+    # Validate all findings upfront
+    for i, f in enumerate(findings):
+        validate_finding(f, i)
+
     head = pr_head_sha(owner, name, a.pr)
+    if a.event != "COMMENT":
+        # GitHub 422s REQUEST_CHANGES/APPROVE on your own PR — downgrade instead of failing.
+        me = sh(["gh", "api", "user", "--jq", ".login"]).strip()
+        if me == pr_author(owner, name, a.pr):
+            sys.stderr.write(
+                f"warning: self-authored PR — GitHub rejects {a.event} on your own PR; "
+                "downgrading to COMMENT\n"
+            )
+            a.event = "COMMENT"
     valid = diff_lines(owner, name, a.pr)
 
     inline, offdiff = [], []
@@ -190,14 +241,16 @@ def _threads_query(owner, name, pr):
     return nodes
 
 
-def _last_baseline(owner, name, pr):
-    me = sh(["gh", "api", "user", "--jq", ".login"]).strip()
-    reviews = json.loads(sh(["gh", "api", f"repos/{owner}/{name}/pulls/{pr}/reviews"]))
+def _last_baseline(owner, name, pr, login=None):
+    if login is None:
+        login = sh(["gh", "api", "user", "--jq", ".login"]).strip()
+    reviews = json.loads(sh(["gh", "api", "--paginate",
+                             f"repos/{owner}/{name}/pulls/{pr}/reviews"]))
     base = ""
     for r in reviews:  # reviews are chronological; keep the last marker
-        login = (r.get("user") or {}).get("login", "")
+        r_login = (r.get("user") or {}).get("login", "")
         body = r.get("body") or ""
-        if MARKER in body and (login == me or login.endswith("[bot]")):
+        if MARKER in body and (r_login == login or r_login.endswith("[bot]")):
             base = body.split(MARKER, 1)[1].split(" ", 1)[0]
     return base
 
@@ -213,10 +266,10 @@ def cmd_threads(a):
         out.append({
             "id": t["id"], "isResolved": t["isResolved"], "isOutdated": t["isOutdated"],
             "path": c.get("path"), "line": c.get("line"),
-            "body": (c.get("body") or "")[:200],
+            "body": c.get("body") or "",
         })
     print(json.dumps({
-        "baseline": _last_baseline(owner, name, a.pr),
+        "baseline": _last_baseline(owner, name, a.pr, me),
         "open": [t for t in out if not t["isResolved"]],
         "resolved": [t for t in out if t["isResolved"]],
     }, indent=2))

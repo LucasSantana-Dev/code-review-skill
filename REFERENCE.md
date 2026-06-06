@@ -131,6 +131,10 @@ P0/P1 stands; `APPROVE` only when genuinely clean; `COMMENT` otherwise.
 1. `threads <PR>` → list open threads + the `baseline` SHA from the prior review body.
 2. `git diff <baseline>..HEAD` → scope to what changed since the last pass.
 3. Per open thread, re-read the code at its `path:line`:
+   - **Outdated** (`isOutdated: true` — the line moved or changed since the comment) →
+     re-read at the code's *current* location, don't trust the stale `line`. If the issue
+     is gone, `reply` "Resolved in `<sha>`: …" then `resolve`; if it still applies, `reply`
+     with the updated location.
    - **Fixed** → `reply` "Resolved in `<sha>`: …" then `resolve <thread_id>`.
    - **Still open** → leave it, or `reply` with the precise remaining gap.
 4. New issues introduced by the fix → collect into a fresh `findings.json` and `post` again

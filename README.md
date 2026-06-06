@@ -62,12 +62,19 @@ Notes:
 `factual|behavioral|speculative`. Confidence × evidence gating decides inline vs summary
 vs drop, and which fixes may auto-apply (see REFERENCE.md).
 
-## Tests
+## Development
+
+Install test dependencies and run the test suite:
 
 ```bash
-python3 tests/test_post_review.py     # no deps
-# or
-python3 -m pytest tests/ -q           # if pytest is installed
+pip install -e ".[test]"
+python3 -m pytest tests/ -q
+```
+
+Tests can also run without pytest:
+
+```bash
+python3 tests/test_post_review.py
 ```
 
 ## License

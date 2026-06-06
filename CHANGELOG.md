@@ -5,6 +5,8 @@ All notable changes to the code-review skill. Format loosely follows
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-06-06
+
 ### Added
 - **Confidence calibration** (ADR-0002): ordered procedure — tag evidence type → derive a
   confidence band (factual 0.8–1.0 / behavioral 0.5–0.8 / speculative 0.0–0.5, aligned to the
@@ -13,17 +15,23 @@ All notable changes to the code-review skill. Format loosely follows
 - **Module deep-dive procedure** for the directory-argument mode: no-diff scoping (boundary
   mapping + bounding), dimension shift toward architecture/maintainability/scalability, and a
   module-health verdict instead of approve/changes-required.
+- **GitHub App posting identity** (ADR-0004): `scripts/app_token.py` mints an installation
+  token (stdlib + `openssl`) so reviews post as a `<app-slug>[bot]`, never a personal account.
 - `allowed-tools` frontmatter on `SKILL.md`; README "Why a bundled script?" positioning (ADR-0003).
 - `post_review.py` hardening: per-finding validation (`validate_finding`), renamed-file
   (`previous_filename`) diff mapping, self-authored-PR `REQUEST_CHANGES`/`APPROVE` → `COMMENT`
   auto-downgrade, `--paginate` on the baseline reviews fetch.
-- More unit tests (16) and a standalone test runner with per-test monkeypatch teardown.
+- More unit tests (25) and a standalone test runner with per-test monkeypatch teardown.
 
 ### Changed
 - **P0/P1 findings always post inline**, regardless of confidence/evidence — no demotion to
   summary/"open questions" (ADR-0002). Evidence/confidence gating now applies to P2/P3 only.
 - `factual` evidence must cite exact file:line + why no runtime context is needed (anchored to
   observable repo facts, not "a test you'd write").
+- **Posting identity is bot-only:** `assert_post_identity` / `CODE_REVIEW_BOT_LOGIN` refuse to
+  post/resolve/reply under any account but the configured bot — never a personal profile.
+- **De-branded output:** posted reviews use a neutral `## Code review` header (no "Senior-QA"
+  stamp); the skill persona is staff-engineer framing.
 
 ### Fixed
 - Empty findings list no longer posts a blank review; thread bodies no longer truncated to
@@ -33,8 +41,8 @@ All notable changes to the code-review skill. Format loosely follows
 - `sync.sh` exits non-zero when no destination directories exist (was a silent success).
 
 ### Notes
-- ADR-0002 (confidence calibration) and ADR-0003 (keep bundled-script packaging; reject
-  MCP/CLI/Action for now) added under `decisions/`.
+- ADRs added under `decisions/`: 0002 (confidence calibration), 0003 (keep bundled-script
+  packaging; reject MCP/CLI/Action), 0004 (GitHub App posting identity).
 
 ## [0.1.0] — 2026-06-05
 

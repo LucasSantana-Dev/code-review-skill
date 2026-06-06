@@ -127,4 +127,5 @@ python3 tests/test_post_review.py
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Apache-2.0 — see [LICENSE](LICENSE). (See [ADR-0007](decisions/0007-distribution-license-contribution.md)
+and [ADR-0008](decisions/0008-permissive-not-copyleft-for-the-corpus.md) for the why.)

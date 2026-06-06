@@ -1,6 +1,6 @@
 # ADR-0007: Distribution, license & contribution model for the open release
 
-- **Status:** Accepted (relicense + go-public pending maintainer confirmation)
+- **Status:** Accepted (relicense to Apache-2.0 applied + repo made public, 2026-06-06)
 - **Date:** 2026-06-06
 - **Deciders:** Lucas Santana (solo operator)
 - **Supersedes:** (none — extends ADR-0003 packaging and ADR-0005 open-core thesis)

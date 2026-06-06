@@ -1,6 +1,6 @@
 # ADR-0008: Permissive (Apache-2.0), not copyleft, for the references corpus
 
-- **Status:** Accepted (license application bundled with the go-public step — see ADR-0007)
+- **Status:** Accepted (Apache-2.0 applied 2026-06-06 — see ADR-0007)
 - **Date:** 2026-06-06
 - **Deciders:** Lucas Santana (solo operator)
 - **Supersedes:** (none — finalizes the license facet of ADR-0007)

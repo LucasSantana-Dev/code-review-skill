@@ -7,7 +7,12 @@ a GitHub PR as a CodeRabbit/cubic-style batched review with resolvable inline th
 fix → re-review loop, size-gated reviewer fan-out, and human-gated self-verifying fixers.
 
 This repo is the **canonical source** for the skill. Deployed copies live under
-`~/.claude/skills/`, `~/.claude-env/skills/`, and `~/.agents/skills/`; sync from here.
+`~/.claude/skills/`, `~/.claude-env/skills/`, and `~/.agents/skills/`. To sync this repo
+to those locations, run:
+
+```bash
+bash scripts/sync.sh
+```
 
 ## Layout
 

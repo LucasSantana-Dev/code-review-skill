@@ -55,8 +55,9 @@ def sh(args, input_=None, check=True):
     p = subprocess.run(
         args, input=input_, capture_output=True, text=True
     )
-    if check and p.returncode != 0:
+    if p.stderr:
         sys.stderr.write(p.stderr)
+    if check and p.returncode != 0:
         raise SystemExit(f"command failed ({p.returncode}): {' '.join(args)}")
     return p.stdout
 
@@ -122,8 +123,11 @@ def fmt_comment_body(f):
 
 def cmd_post(a):
     owner, name = resolve_repo(a.repo)
-    with open(a.findings) as f:
-        findings = json.loads(f.read())
+    try:
+        with open(a.findings) as f:
+            findings = json.loads(f.read())
+    except FileNotFoundError:
+        raise SystemExit(f"findings file not found: {a.findings}")
     if not isinstance(findings, list):
         raise SystemExit("findings.json must be a JSON list")
     head = pr_head_sha(owner, name, a.pr)
@@ -181,6 +185,8 @@ def _threads_query(owner, name, pr):
     out = sh(["gh", "api", "graphql", "-f", f"query={q}",
               "-F", f"o={owner}", "-F", f"r={name}", "-F", f"n={pr}"])
     nodes = json.loads(out)["data"]["repository"]["pullRequest"]["reviewThreads"]["nodes"]
+    if len(nodes) == 100:
+        sys.stderr.write("warning: review threads response hit the 100-result limit; some threads may be missing\n")
     return nodes
 
 

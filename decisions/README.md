@@ -29,6 +29,8 @@ Format: Context · Decision · Alternatives · Consequences · Revisit when.
 | **[0022](0022-curation-sla-and-drift-guard.md)** | Curation SLA + drift guard | Accepted |
 | **[0023](0023-quality-eval-harness.md)** | Quality/eval harness | Accepted |
 | **[0024](0024-versioning-and-release-strategy.md)** | Versioning + release strategy | Accepted |
+| **[0025](0025-monetization-path-defer-keep-open-expertise-led.md)** | Monetization path — defer; keep core free/open; expertise-led upside | Accepted (defer) |
 
 ADR-0011 … 0024 are the **pre-code design package** for the CI Action runner — see
 [docs/DESIGN.md](../docs/DESIGN.md) for the package overview and reading order.
+ADR-0025 records the **monetization** decision (defer + demand-gated; keep the open layer open).

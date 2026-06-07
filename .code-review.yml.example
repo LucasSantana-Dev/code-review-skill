@@ -1,0 +1,11 @@
+# .code-review.yml — minimal Phase-0 config (ADR-0021). All keys optional; the
+# runner works with zero config. Precedence: CLI/env > this file > defaults.
+
+provider: anthropic            # anthropic | mock   (openai-compatible: P1, ollama: P3)
+model: claude-sonnet-4-6       # claude-opus-4-8 for max quality
+api_key_env: CODE_REVIEW_API_KEY
+
+# severity_floor: P1           # minimum severity to surface inline (P2/P3 fold to summary)
+# dimensions: [correctness, security]   # Phase-0 MVP set (ADR-0019)
+# skip_trivial: true
+# context_radius: 10

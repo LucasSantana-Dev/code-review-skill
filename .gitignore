@@ -4,6 +4,8 @@ __pycache__/
 /tmp/
 .pytest_cache/
 .benchmarks/
+/review/
+/eval/results/
 .claude/
 *.egg-info/
 build/
